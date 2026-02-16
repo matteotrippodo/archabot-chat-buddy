@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import LoginPage from "@/components/LoginPage";
 import Sidebar from "@/components/Sidebar";
 import ChatArea from "@/components/ChatArea";
-import { Conversation, Message } from "@/types/chat";
+import { Conversation, Message, MessageAttachment } from "@/types/chat";
 import { createMockConversations, getMockResponse } from "@/data/mockData";
 
 const Index = () => {
@@ -51,12 +51,18 @@ const Index = () => {
   );
 
   const handleSend = useCallback(
-    (text: string) => {
+    (text: string, files?: File[]) => {
       if (!activeConvId) return;
       const uid = () => Math.random().toString(36).slice(2, 10);
       const ts = new Date().toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
 
-      const userMsg: Message = { id: uid(), role: "user", content: text, timestamp: ts };
+      const attachments: MessageAttachment[] = (files || []).map((f) => ({
+        name: f.name,
+        url: URL.createObjectURL(f),
+        type: f.type.startsWith("image/") ? "image" as const : "file" as const,
+      }));
+
+      const userMsg: Message = { id: uid(), role: "user", content: text, timestamp: ts, attachments: attachments.length > 0 ? attachments : undefined };
       const response = getMockResponse(text);
 
       setConversations((prev) =>
@@ -69,7 +75,11 @@ const Index = () => {
 
       // Simulate delay
       setTimeout(() => {
-        const botMsg: Message = { id: uid(), role: "assistant", content: response, timestamp: ts };
+        let botContent = response;
+        if (attachments.length > 0) {
+          botContent += `\n\n📎 Ho ricevuto ${attachments.length} file.`;
+        }
+        const botMsg: Message = { id: uid(), role: "assistant", content: botContent, timestamp: ts };
         setConversations((prev) =>
           prev.map((c) =>
             c.id === activeConvId
