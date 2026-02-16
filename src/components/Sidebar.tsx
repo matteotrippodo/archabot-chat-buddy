@@ -1,5 +1,6 @@
-import { MessageSquare, Plus, Trash2, LogOut, User, Bot } from "lucide-react";
+import { MessageSquare, Plus, Trash2, LogOut, User, Bot, Sun, Moon } from "lucide-react";
 import { Conversation } from "@/types/chat";
+import { useTheme } from "@/hooks/useTheme";
 
 interface SidebarProps {
   conversations: Conversation[];
@@ -12,6 +13,8 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ conversations, activeConvId, username, onSelect, onNew, onDelete, onLogout }: SidebarProps) => {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <div className="flex h-full w-72 flex-col border-r border-border bg-sidebar">
       {/* Header */}
@@ -19,10 +22,17 @@ const Sidebar = ({ conversations, activeConvId, username, onSelect, onNew, onDel
         <div className="flex h-9 w-9 items-center justify-center rounded-lg gradient-primary">
           <Bot className="h-5 w-5 text-primary-foreground" />
         </div>
-        <div>
+        <div className="flex-1">
           <h2 className="text-sm font-bold text-foreground">Archabot</h2>
           <p className="text-xs text-muted-foreground">Chat AI</p>
         </div>
+        <button
+          onClick={toggleTheme}
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-all hover:bg-secondary hover:text-foreground"
+          title={theme === "dark" ? "Tema chiaro" : "Tema scuro"}
+        >
+          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </button>
       </div>
 
       {/* New conversation */}
